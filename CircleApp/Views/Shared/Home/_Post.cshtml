@@ -104,7 +104,7 @@
     @* Add comment section *@
     <div>
         <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
-            @foreach (var comment in Model.Comments)
+            @foreach (var comment in Model.Comments.OrderByDescending(n => n.DateCreated).Take(3))
             {
                 TimeSpan commentTimeSpanPosted = DateTime.Now.Subtract(comment.DateCreated);
                 // using switch
@@ -127,10 +127,32 @@
                             </a>
                             <small>@commentdisplayTime</small>
                         </div>
-                        <p class="mt-0.5 ">
-                            @comment.Content
-                        </p>
+                        <div class="flex items-center justify-between">
+                            <p class="mt-0.5 ">
+                                @comment.Content
+                            </p>
+                            <form asp-controller="Home" asp-action="RemovePostComment">
+                                <input type="hidden" name="commentId" value="@comment.Id"/>
+                                <button type="submit"
+                                        class="text-red-500 text-xs ml-2 cursor-pointer"
+                                        title="Remove Post Comment">
+
+                                    <ion-icon name="trash-outline"
+                                              style="pointer-events: none;">
+                                    </ion-icon>
+
+                                </button>
+                            </form>
+                        </div>
                     </div>
+                </div>
+            }
+            @if (Model.Comments.Count > 3)
+            {
+                <div class="p-1.5">
+                    <a>
+                        Show all comments
+                    </a>
                 </div>
             }
         </div>

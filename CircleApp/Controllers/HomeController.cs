@@ -111,5 +111,16 @@ namespace CircleApp.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        public async Task<IActionResult> RemovePostComment (RemoveCommentVM removeCommentVM)
+        {
+            var comment = await _context.comments.FirstOrDefaultAsync(c => c.Id == removeCommentVM.CommentId);
+            if (comment != null)
+            {
+                _context.comments.Remove(comment);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
     }
 }
