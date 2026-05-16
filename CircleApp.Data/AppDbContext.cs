@@ -16,7 +16,7 @@ namespace CircleApp.Data
         public DbSet<Post> posts { get; set; }
         public DbSet<User> users { get; set; }
         public DbSet<Like> likes { get; set; }
-
+        public DbSet<Comment> comments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -34,6 +34,17 @@ namespace CircleApp.Data
             modelBuilder.Entity<Like>()
                 .HasOne(l => l.User)
                 .WithMany(u => u.Likes)
+                .HasForeignKey(l => l.userId)
+                .OnDelete(DeleteBehavior.Restrict);
+            //Comments
+            modelBuilder.Entity<Comment>()
+                .HasOne(l => l.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(l => l.postId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Comment>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Comments)
                 .HasForeignKey(l => l.userId)
                 .OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(modelBuilder);

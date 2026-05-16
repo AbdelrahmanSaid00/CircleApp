@@ -22,6 +22,7 @@ namespace CircleApp.Controllers
             var allPosts = await _context.posts
                 .Include(p => p.User) 
                 .Include(p => p.Likes)
+                .Include(p => p.Comments).ThenInclude(c => c.User)
                 .OrderByDescending(n => n.DataCreated)
                 .ToListAsync();
             return View(allPosts);
@@ -89,6 +90,34 @@ namespace CircleApp.Controllers
                     userId = loggedInUserId
                 };
                 await _context.likes.AddAsync(newLike);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddPostComment (PostCommentVM postCommentVM)
+        {
+            int loggedUserId = 1;
+            //Create a Post Object
+            var newComment = new Comment()
+            {
+                postId = postCommentVM.PostId,
+                userId = loggedUserId,
+                Content = postCommentVM.Content,
+                DateCreated = DateTime.Now,
+                DateUpdate = DateTime.Now,
+            };
+            await _context.comments.AddAsync(newComment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> RemovePostComment (RemoveCommentVM removeCommentVM)
+        {
+            var comment = await _context.comments.FirstOrDefaultAsync(c => c.Id == removeCommentVM.CommentId);
+            if (comment != null)
+            {
+                _context.comments.Remove(comment);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Index");
