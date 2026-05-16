@@ -15,6 +15,7 @@ namespace CircleApp.Data
         }
         public DbSet<Post> posts { get; set; }
         public DbSet<User> users { get; set; }
+        public DbSet<Like> likes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +23,20 @@ namespace CircleApp.Data
                 .HasMany(u => u.Posts)
                 .WithOne(p => p.User)
                 .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<Like>()
+                .HasKey(l => new { l.postId , l.userId });
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Post)
+                .WithMany(p => p.Likes)
+                .HasForeignKey(l => l.postId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Likes)
+                .HasForeignKey(l => l.userId)
+                .OnDelete(DeleteBehavior.Restrict);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
