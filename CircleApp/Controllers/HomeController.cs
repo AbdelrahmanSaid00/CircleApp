@@ -19,7 +19,9 @@ namespace CircleApp.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            int LoggedUserIn = 1;
             var allPosts = await _context.posts
+                .Where(n => !n.IsPrivate || n.UserId == LoggedUserIn)
                 .Include(p => p.User) 
                 .Include(p => p.Likes)
                 .Include(p => p.Favorites)
@@ -117,6 +119,22 @@ namespace CircleApp.Controllers
                     userId = loggedInUserId
                 };
                 await _context.favorites.AddAsync(newFavorite);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
+        {
+            int loggedInUserId = 1;
+
+            //check if the user has already want to make the post visible or not
+            var post = await _context.posts
+                .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUserId);
+            if (post != null)
+            {
+                post.IsPrivate = !post.IsPrivate;
+                _context.posts.Update(post);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Index");
