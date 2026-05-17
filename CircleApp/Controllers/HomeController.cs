@@ -19,11 +19,14 @@ namespace CircleApp.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            int LoggedUserIn = 1;
             var allPosts = await _context.posts
+                .Where(n => (!n.IsPrivate || n.UserId == LoggedUserIn) && n.Reports.Count < 5)
                 .Include(p => p.User) 
                 .Include(p => p.Likes)
                 .Include(p => p.Favorites)
                 .Include(p => p.Comments).ThenInclude(c => c.User)
+                .Include(p => p.Reports)
                 .OrderByDescending(n => n.DataCreated)
                 .ToListAsync();
             return View(allPosts);
@@ -122,6 +125,22 @@ namespace CircleApp.Controllers
             return RedirectToAction("Index");
         }
         [HttpPost]
+        public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
+        {
+            int loggedInUserId = 1;
+
+            //check if the user has already want to make the post visible or not
+            var post = await _context.posts
+                .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUserId);
+            if (post != null)
+            {
+                post.IsPrivate = !post.IsPrivate;
+                _context.posts.Update(post);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
         public async Task<IActionResult> AddPostComment (PostCommentVM postCommentVM)
         {
             int loggedUserId = 1;
@@ -135,6 +154,21 @@ namespace CircleApp.Controllers
                 DateUpdate = DateTime.Now,
             };
             await _context.comments.AddAsync(newComment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
+        {
+            int loggedUserId = 1;
+            //Create a Post Object
+            var newReport = new Report()
+            {
+                postId = postReportVM.PostId,
+                userId = loggedUserId,
+                DateCreate = DateTime.Now
+            };
+            await _context.reports.AddAsync(newReport);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }

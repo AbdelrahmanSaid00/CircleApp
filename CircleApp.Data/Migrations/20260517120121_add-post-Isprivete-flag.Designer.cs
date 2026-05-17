@@ -4,6 +4,7 @@ using CircleApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CircleApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517120121_add-post-Isprivete-flag")]
+    partial class addpostIspriveteflag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,27 +134,6 @@ namespace CircleApp.Migrations
                     b.ToTable("posts");
                 });
 
-            modelBuilder.Entity("CircleApp.Data.Models.Report", b =>
-                {
-                    b.Property<int>("postId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateCreate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("postId", "userId");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("reports");
-                });
-
             modelBuilder.Entity("CircleApp.Data.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -240,25 +222,6 @@ namespace CircleApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CircleApp.Data.Models.Report", b =>
-                {
-                    b.HasOne("CircleApp.Data.Models.Post", "Post")
-                        .WithMany("Reports")
-                        .HasForeignKey("postId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("CircleApp.Data.Models.User", "User")
-                        .WithMany("Reports")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("CircleApp.Data.Models.Post", b =>
                 {
                     b.Navigation("Comments");
@@ -266,8 +229,6 @@ namespace CircleApp.Migrations
                     b.Navigation("Favorites");
 
                     b.Navigation("Likes");
-
-                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("CircleApp.Data.Models.User", b =>
@@ -279,8 +240,6 @@ namespace CircleApp.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("Posts");
-
-                    b.Navigation("Reports");
                 });
 #pragma warning restore 612, 618
         }
