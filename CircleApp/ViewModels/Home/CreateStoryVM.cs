@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace CircleApp.ViewModels.Home
 {
-    public class PostVM
+    public class CreateStoryVM
     {
-        public string Content { get; set; }
         public IFormFile Image { get; set; }
     }
 }

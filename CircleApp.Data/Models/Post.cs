@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace CircleApp.Data.Models
 {
@@ -12,6 +12,8 @@ namespace CircleApp.Data.Models
         public int NrOfReports { get; set; }
         public DateTime DataCreated { get; set; }
         public DateTime DataUpdated { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
 
         // Foreign key to the User who created the post
         public int UserId { get; set; }
@@ -21,5 +23,6 @@ namespace CircleApp.Data.Models
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
+        public ICollection<Hashtag> Hashtags { get; set; } = new List<Hashtag>();
     }
 }

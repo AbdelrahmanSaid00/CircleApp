@@ -1,4 +1,4 @@
-﻿using CircleApp.Data.Models;
+using CircleApp.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
@@ -19,12 +19,39 @@ namespace CircleApp.Data
         public DbSet<Comment> comments { get; set; }
         public DbSet<Favorite> favorites { get; set; }
         public DbSet<Report> reports { get; set; }
+        public DbSet<Story> stories { get; set; }
+        public DbSet<Hashtag> hashtags { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Post>()
+                .HasQueryFilter(p => !p.IsDeleted);
+
+            modelBuilder.Entity<Comment>()
+                .HasQueryFilter(c => !c.Post.IsDeleted);
+
+            modelBuilder.Entity<Favorite>()
+                .HasQueryFilter(f => !f.Post.IsDeleted);
+
+            modelBuilder.Entity<Like>()
+                .HasQueryFilter(l => !l.Post.IsDeleted);
+
+            modelBuilder.Entity<Report>()
+                .HasQueryFilter(r => !r.Post.IsDeleted);
+
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Posts)
                 .WithOne(p => p.User)
                 .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<Story>()
+                .HasOne(s => s.User)
+                .WithMany(u => u.Stories)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Post>()
+                .HasMany(p => p.Hashtags)
+                .WithMany(h => h.Posts);
 
             modelBuilder.Entity<Like>()
                 .HasKey(l => new { l.postId , l.userId });

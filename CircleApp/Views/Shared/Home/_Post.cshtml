@@ -185,14 +185,4 @@
         </form>
     </div>
 
-</div>
-<partial name="/Views/Home/_PostDeleteConfirmation.cshtml" />
-
-<script>
-    function openPostDeleteConfirmation(postId) {
-        console.log('Post ID to delete:', postId);
-        UIkit.dropdown('.post-options-dropdown').hide();
-        document.getElementById('postId').value = postId;
-        UIkit.modal('#postDeleteDialog').show();
-    }
-</script>
+    </div>

@@ -1,4 +1,4 @@
-﻿namespace CircleApp.ViewModels.Home
+namespace CircleApp.ViewModels.Home
 {
     public class PostLIikeVM
     {

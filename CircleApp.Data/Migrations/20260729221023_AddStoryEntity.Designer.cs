@@ -4,6 +4,7 @@ using CircleApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CircleApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729221023_AddStoryEntity")]
+    partial class AddStoryEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,26 +77,6 @@ namespace CircleApp.Migrations
                     b.HasIndex("userId");
 
                     b.ToTable("favorites");
-                });
-
-            modelBuilder.Entity("CircleApp.Data.Models.Hashtag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Tag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UsageCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("hashtags");
                 });
 
             modelBuilder.Entity("CircleApp.Data.Models.Like", b =>
@@ -223,21 +206,6 @@ namespace CircleApp.Migrations
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("HashtagPost", b =>
-                {
-                    b.Property<int>("HashtagsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PostsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("HashtagsId", "PostsId");
-
-                    b.HasIndex("PostsId");
-
-                    b.ToTable("HashtagPost");
-                });
-
             modelBuilder.Entity("CircleApp.Data.Models.Comment", b =>
                 {
                     b.HasOne("CircleApp.Data.Models.Post", "Post")
@@ -334,21 +302,6 @@ namespace CircleApp.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HashtagPost", b =>
-                {
-                    b.HasOne("CircleApp.Data.Models.Hashtag", null)
-                        .WithMany()
-                        .HasForeignKey("HashtagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CircleApp.Data.Models.Post", null)
-                        .WithMany()
-                        .HasForeignKey("PostsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CircleApp.Data.Models.Post", b =>
