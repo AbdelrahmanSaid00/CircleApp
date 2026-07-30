@@ -1,11 +1,17 @@
 using CircleApp.Data;
 using CircleApp.Data.Helpers;
+using CircleApp.Services.Interfaces;
+using CircleApp.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IStoryService, StoryService>();
+builder.Services.AddScoped<IHashtagService, HashtagService>();
 
 //Database Configuration
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");

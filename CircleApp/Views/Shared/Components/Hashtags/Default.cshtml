@@ -1,0 +1,26 @@
+@model List<CircleApp.ViewModels.Home.HashtagVM>
+
+<div class="flex justify-between text-black">
+    <h3 class="font-bold text-base">Trends for you</h3>
+</div>
+
+<div class="space-y-3.5 capitalize text-xs font-normal mt-5 mb-2 text-gray-600">
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var hashtag in Model)
+        {
+            <a asp-controller="Home" asp-action="Hashtag" asp-route-tag="@hashtag.Tag" class="block hover:bg-gray-50 p-1 -mx-1 rounded-lg transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <h2 class="font-semibold text-black hover:text-blue-600 transition-colors">@hashtag.Tag</h2>
+                        <div class="mt-0.5 mb-1 text-gray-500">@hashtag.PostCount post@(hashtag.PostCount == 1 ? "" : "s")</div>
+                    </div>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="text-xs text-gray-500 py-1">There are no tags.</div>
+    }
+</div>
