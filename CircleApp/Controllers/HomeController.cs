@@ -14,6 +14,7 @@ namespace CircleApp.Controllers
         private readonly IStoryService _storyService;
         private readonly IHashtagService _hashtagService;
         private readonly IFileService _fileService;
+        private readonly IFavoriteService _favoriteService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
@@ -21,12 +22,14 @@ namespace CircleApp.Controllers
             IStoryService storyService,
             IHashtagService hashtagService,
             IFileService fileService,
+            IFavoriteService favoriteService,
             ILogger<HomeController> logger)
         {
             _postService = postService;
             _storyService = storyService;
             _hashtagService = hashtagService;
             _fileService = fileService;
+            _favoriteService = favoriteService;
             _logger = logger;
         }
 
@@ -157,6 +160,21 @@ namespace CircleApp.Controllers
 
             var posts = await _hashtagService.GetPostsByHashtagAsync(normalizedTag);
             return View(posts);
+        }
+        [HttpPost]
+        public async Task<IActionResult> TogglePostFavorite (int postId)
+        {
+            int loggedInUserId = 1;
+            await _favoriteService.ToggleAsync(postId, loggedInUserId);
+            bool isFavorite = await _favoriteService.IsFavoriteAsync(postId , loggedInUserId);
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> MyFavorites ()
+        {
+            int logedInUserId = 1;
+            var favoritePosts = await _favoriteService.GetFavoritePostsForUserAsync(logedInUserId);
+            return View(favoritePosts);
         }
     }
 }
