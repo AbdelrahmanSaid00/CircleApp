@@ -75,6 +75,11 @@ namespace CircleApp.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
+            if (string.IsNullOrWhiteSpace(postCommentVM.Content))
+            {
+                ModelState.AddModelError("Content", "Comment content cannot be empty.");
+                return RedirectToAction("Index");
+            }
             int loggedInUserId = 1;
             await _postService.AddPostCommentAsync(postCommentVM, loggedInUserId);
             return RedirectToAction("Index");

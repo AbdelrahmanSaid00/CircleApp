@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Identity;
+using CircleApp.Data.Models;
 
 // Configure Serilog early during startup
 Log.Logger = new LoggerConfiguration()
@@ -41,6 +43,14 @@ try
     // Database Configuration
     var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(dbConnectionString));
+    //Identity Configuration
+
+    builder.Services.AddIdentity<User, IdentityRole<int>>()
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
+    builder.Services.AddAuthentication();
+    builder.Services.AddAuthorization();
 
     var app = builder.Build();
 
@@ -53,6 +63,9 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await dbContext.Database.MigrateAsync(); // Apply any pending migrations
         await DbInitializer.SeedAsync(dbContext); // Seed the database with initial data
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+        await DbInitializer.SeedUserAndRolesAsync(userManager, roleManager); // Seed users and roles
     }
 
     // Configure the HTTP request pipeline.
@@ -66,6 +79,7 @@ try
     app.UseHttpsRedirection();
     app.UseRouting();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapStaticAssets();

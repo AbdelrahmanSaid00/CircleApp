@@ -1,10 +1,12 @@
 using CircleApp.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
 namespace CircleApp.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User , IdentityRole<int> , int>
     {
         public AppDbContext()
         {
@@ -102,7 +104,26 @@ namespace CircleApp.Data
                 .WithMany(u => u.Reports)
                 .HasForeignKey(f => f.userId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            
             base.OnModelCreating(modelBuilder);
+
+            //Customize the ASP.NET Identity model table names
+            modelBuilder.Entity<User>()
+                .ToTable("Users");
+            modelBuilder.Entity<IdentityRole<int>>()
+                .ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<int>>()
+                .ToTable("UserRoles");
+            modelBuilder.Entity<IdentityUserClaim<int>>()
+                .ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserLogin<int>>()
+                .ToTable("UserLogins");
+            modelBuilder.Entity<IdentityRoleClaim<int>>()
+                .ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<int>>()
+                .ToTable("UserTokens");
+
         }
     }
 }
