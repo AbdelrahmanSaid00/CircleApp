@@ -35,6 +35,7 @@ try
     builder.Services.AddScoped<IPostService, PostService>();
     builder.Services.AddScoped<IStoryService, StoryService>();
     builder.Services.AddScoped<IHashtagService, HashtagService>();
+    builder.Services.AddScoped<IFavoriteService , FavoriteService>();
 
     // Database Configuration
     var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");

@@ -1,0 +1,73 @@
+@model List<Post>
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+    <div class="lg:flex 2xl:gap-16 gap-12 max-w-[1065px] mx-auto" id="js-oversized">
+        
+        <div class="max-w-[680px] mx-auto flex-1">
+            @* Header Section *@
+            <div class="bg-white rounded-xl shadow-sm p-5 border1 mb-6">
+                <div class="flex items-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="button-icon w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center">
+                        <ion-icon name="arrow-back-outline" class="text-xl text-black"></ion-icon>
+                    </a>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-black flex items-center gap-2">
+                            <span>My Favorite Posts</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 font-semibold">
+                                @Model.Count post@(Model.Count == 1 ? "" : "s")
+                            </span>
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Posts you have bookmarked for quick access</p>
+                    </div>
+                </div>
+            </div>
+
+            @* Posts Feed *@
+            <div class="md:max-w-[580px] mx-auto flex-1 xl:space-y-6 space-y-3">
+                @if (Model == null || Model.Count == 0)
+                {
+                    <div class="bg-white rounded-xl shadow-sm md:p-8 p-6 text-center space-y-3 border1">
+                        <ion-icon name="bookmark-outline" class="text-4xl text-gray-400"></ion-icon>
+                        <h3 class="text-base font-semibold text-black">No favorite posts yet</h3>
+                        <p class="text-xs text-gray-500 max-w-sm mx-auto">You haven't bookmarked any posts. Click the bookmark icon on any post to add it to your favorites!</p>
+                        <a asp-controller="Home" asp-action="Index" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors mt-2">Browse Home Feed</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var post in Model)
+                    {
+                        <partial name="Home/_Post" model="post"/>
+                    }
+                }
+            </div>
+
+        </div>
+
+        @* Sidebar *@
+        <div class="flex-1">
+            <div class="lg:space-y-4 lg:pb-8 max-lg:grid sm:grid-cols-2 max-lg:gap-6">
+                <div class="box p-5 px-6">
+                    <partial name="Sidebar/_SuggestedFriends" />
+                </div>
+                <div class="box p-5 px-6 border1">
+                    @await Component.InvokeAsync("Hashtags")
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<partial name="Modals/_CreateStory"></partial>
+<partial name="Modals/_CreateStatus" model="new PostVM()"></partial>
+<partial name="~/Views/Home/_PostDeleteConfirmation.cshtml" />
+
+<script>
+    function openPostDeleteConfirmation(postId) {
+        console.log('Post ID to delete:', postId);
+        UIkit.dropdown('.post-options-dropdown').hide();
+        document.getElementById('postId').value = postId;
+        UIkit.modal('#postDeleteDialog').show();
+    }
+</script>
