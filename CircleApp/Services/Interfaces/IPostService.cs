@@ -8,6 +8,7 @@ namespace CircleApp.Services.Interfaces
     public interface IPostService
     {
         Task<List<Post>> GetAllPostsAsync(int currentUserId);
+        Task<Post> GetPostByIdAsync(int postId);
         Task CreatePostAsync(PostVM postVM, int userId);
         Task TogglePostLikeAsync(int postId, int userId);
         Task TogglePostFavoriteAsync(int postId, int userId);
