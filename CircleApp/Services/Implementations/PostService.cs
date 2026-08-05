@@ -177,6 +177,8 @@ namespace CircleApp.Services.Implementations
                 post.DeletedAt = DateTime.Now;
                 _context.posts.Update(post);
                 await _context.SaveChangesAsync();
+
+                await _hashtagService.RemoveHashtagsForPostAsync(postId);
             }
         }
 
@@ -198,6 +200,20 @@ namespace CircleApp.Services.Implementations
                 _context.posts.Remove(post);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<Post> GetPostByIdAsync(int postId)
+        {
+            return await _context.posts
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.Favorites)
+                .Include(p => p.Hashtags)
+                .Include(p => p.Comments).ThenInclude(c => c.User)
+                .Include(p => p.Reports)
+                .ThenInclude(r => r.User)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == postId);
         }
     }
 }

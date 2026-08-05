@@ -56,13 +56,13 @@ namespace CircleApp.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
-        {
-            int loggedInUserId = 1;
-            await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId);
-            return RedirectToAction("Index");
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
+        //{
+        //    int loggedInUserId = 1;
+        //    await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId);
+        //    return RedirectToAction("Index");
+        //}
 
         [HttpPost]
         public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
@@ -86,6 +86,16 @@ namespace CircleApp.Controllers
             int loggedInUserId = 1;
             await _postService.AddPostReportAsync(postReportVM, loggedInUserId);
             return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var post = await _postService.GetPostByIdAsync(id);
+            if (post == null)
+            {
+                return RedirectToAction("Index");
+            }
+            return View(post);
         }
 
         [HttpPost]

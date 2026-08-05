@@ -1,0 +1,252 @@
+@model Post
+
+@{
+    ViewData["Title"] = "Post Details";
+    TimeSpan timeSpanPosted = DateTime.Now.Subtract(Model.DataCreated);
+    string displayTime = timeSpanPosted switch
+    {
+        var t when t.TotalDays >= 365 => $"{(int)(t.TotalDays / 365)} year{(t.TotalDays / 365 >= 2 ? "s" : "")} ago",
+        var t when t.TotalDays >= 1 => $"{(int)t.TotalDays} day{(t.TotalDays >= 2 ? "s" : "")} ago",
+        var t when t.TotalHours >= 1 => $"{(int)t.TotalHours} hour{(t.TotalHours >= 2 ? "s" : "")} ago",
+        var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes} minute{(t.TotalMinutes >= 2 ? "s" : "")} ago",
+        _ => "Just now"
+    };
+
+    bool isFavorite = Model.Favorites?.Any(n => n.userId == 1) ?? false;
+    bool isLike = Model.Likes?.Any(n => n.userId == 1) ?? false;
+    bool isPrivate = Model.IsPrivate && Model.UserId == 1;
+    bool isReported = Model.Reports?.Any(n => n.userId == 1) ?? false;
+}
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+    <div class="lg:flex 2xl:gap-16 gap-12 max-w-[1065px] mx-auto" id="js-oversized">
+        
+        <div class="max-w-[680px] mx-auto flex-1 space-y-6">
+            
+            @* Header Section *@
+            <div class="bg-white rounded-xl shadow-sm p-5 border1 flex items-center gap-3">
+                <a asp-controller="Home" asp-action="Index" class="button-icon w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center">
+                    <ion-icon name="arrow-back-outline" class="text-xl text-black"></ion-icon>
+                </a>
+                <div>
+                    <h2 class="text-xl font-extrabold text-black">Post Details</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Viewing full post by @(Model.User?.FullName ?? "Unknown User")</p>
+                </div>
+            </div>
+
+            @* Full Post Card *@
+            <div class="bg-white rounded-xl shadow-sm text-sm font-medium border1">
+                
+                @* Post Author Header *@
+                <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
+                    <a>
+                        <img src="@(Model.User?.ProfilePictureUrl ?? "/images/avatar/user.png")" class="w-10 h-10 rounded-full object-cover" />
+                    </a>
+                    <div class="flex-1">
+                        <a>
+                            <h4 class="text-black font-bold">@(Model.User?.FullName ?? "Unknown User")</h4>
+                            <div class="text-xs text-gray-500/80">@displayTime</div>
+                        </a>
+                    </div>
+
+                    <div class="-mr-1">
+                        <button type="button" class="button-icon w-8 h-8">
+                            <ion-icon class="text-xl" name="ellipsis-horizontal"></ion-icon>
+                        </button>
+                        <div class="w-[245px] post-options-dropdown" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: true; mode: click">
+                            @if (Model.UserId == 1)
+                            {
+                                <form asp-controller="Home" asp-action="TogglePostVisibility">
+                                    <input type="hidden" name="postId" value="@Model.Id"/>
+                                    <button type="submit" class="hover:!bg-red-50 icon-link">
+                                        <ion-icon name="@(isPrivate ? "lock-open-outline" : "lock-closed-outline")"></ion-icon>  Set as @(isPrivate ? "public" : "private")
+                                    </button>
+                                </form>
+                                <hr>
+                                <button type="button" onclick="openPostDeleteConfirmation('@Model.Id')" class="text-red-400 hover:!bg-red-50 delete-post-btn">
+                                    <ion-icon name="trash-bin-outline"></ion-icon>  Delete Post
+                                </button>
+                            }
+                            @if (!isReported)
+                            {
+                                <form asp-controller="Home" asp-action="AddPostReport">
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="hover:!bg-red-50 icon-link">
+                                        <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon>  Report
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @* Post Content Paragraph *@
+                <div class="sm:px-4 p-2.5 pt-0 w-full space-y-3">
+                    <p class="font-normal text-slate-800 text-base leading-relaxed">
+                        @Model.Content
+                    </p>
+
+                    @* Hashtags display *@
+                    @if (Model.Hashtags != null && Model.Hashtags.Any())
+                    {
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            @foreach (var hashtag in Model.Hashtags)
+                            {
+                                <a asp-controller="Home" asp-action="Hashtag" asp-route-tag="@hashtag.Tag" 
+                                   class="text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition-colors">
+                                    @(hashtag.Tag.StartsWith("#") ? hashtag.Tag : "#" + hashtag.Tag)
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Post Image *@
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="relative w-full mt-3 sm:px-4">
+                        <img src="@Model.ImageUrl" class="sm:rounded-lg w-full max-h-[500px] object-cover" />
+                    </div>
+                }
+
+                @* Post Action Icons & Counts *@
+                <div class="sm:p-4 p-2.5 flex items-center gap-4 text-xs font-semibold border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <form asp-controller="Home" asp-action="TogglePostLike" method="post">
+                            <input type="hidden" name="postId" value="@Model.Id"/>
+                            <button type="submit" class="button-icon @(isLike ? "text-red-500 bg-red-100" : "")">
+                                <ion-icon class="text-lg" name="@(isLike ? "heart" : "heart-outline")"></ion-icon>
+                            </button>
+                        </form>
+                        <span>@(Model.Likes?.Count ?? 0)</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="button-icon">
+                            <ion-icon class="text-lg" name="chatbubble-ellipses-outline"></ion-icon>
+                        </div>
+                        <span>@(Model.Comments?.Count ?? 0)</span>
+                    </div>
+
+                    <div class="ml-auto flex items-center gap-2">
+                        <form asp-controller="Home" asp-action="TogglePostFavorite" method="post">
+                            <input type="hidden" name="postId" value="@Model.Id" />
+                            <button type="submit" class="button-icon @(isFavorite ? "text-orange-500 bg-orange-100" : "")">
+                                <ion-icon class="text-lg" name="@(isFavorite ? "bookmark" : "bookmark-outline")"></ion-icon>
+                            </button>
+                        </form>
+                        @if ((Model.Favorites?.Count ?? 0) > 0)
+                        {
+                            <span>@Model.Favorites?.Count</span>
+                        }
+                    </div>
+                </div>
+
+                @* All Comments Section *@
+                <div class="p-4 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-black flex items-center gap-2">
+                            <span>Comments</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
+                                @(Model.Comments?.Count ?? 0)
+                            </span>
+                        </h3>
+                    </div>
+
+                    <!-- Add Comment Input Box -->
+                    <form asp-controller="Home" asp-action="AddPostComment" method="post">
+                        <input type="hidden" name="postId" value="@Model.Id" />
+                        <div class="flex items-center gap-2 border border-slate-200 rounded-xl p-1.5 bg-slate-50 focus-within:bg-white focus-within:border-blue-500 transition-all">
+                            <img src="/images/avatar/user.png" class="w-7 h-7 rounded-full ml-1" />
+                            <div class="flex-1">
+                                <textarea name="content" placeholder="Write a comment..." rows="1" required class="w-full resize-none bg-transparent px-2 py-1.5 text-xs text-black focus:outline-none"></textarea>
+                            </div>
+                            <button type="submit" class="text-xs font-semibold px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                                Post
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Complete List of ALL Comments -->
+                    <div class="space-y-4 pt-2">
+                        @if (Model.Comments != null && Model.Comments.Any())
+                        {
+                            @foreach (var comment in Model.Comments.OrderBy(c => c.DateCreated))
+                            {
+                                TimeSpan cTimeSpan = DateTime.Now.Subtract(comment.DateCreated);
+                                string cDisplayTime = cTimeSpan switch
+                                {
+                                    var t when t.TotalDays >= 365 => $"{(int)(t.TotalDays / 365)}y ago",
+                                    var t when t.TotalDays >= 1 => $"{(int)t.TotalDays}d ago",
+                                    var t when t.TotalHours >= 1 => $"{(int)t.TotalHours}h ago",
+                                    var t when t.TotalMinutes >= 1 => $"{(int)t.TotalMinutes}m ago",
+                                    _ => "Just now"
+                                };
+
+                                <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    <img src="@(string.IsNullOrEmpty(comment.User?.ProfilePictureUrl) ? "/images/avatar/user.png" : comment.User.ProfilePictureUrl)" 
+                                         class="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5" />
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <h5 class="text-xs font-bold text-black truncate">
+                                                @(comment.User?.FullName ?? "User")
+                                            </h5>
+                                            <span class="text-[11px] text-gray-400 shrink-0">@cDisplayTime</span>
+                                        </div>
+                                        
+                                        <p class="text-xs text-slate-700 font-normal mt-1 leading-relaxed break-words">
+                                            @comment.Content
+                                        </p>
+                                    </div>
+
+                                    <form asp-controller="Home" asp-action="RemovePostComment" method="post" class="shrink-0">
+                                        <input type="hidden" name="commentId" value="@comment.Id"/>
+                                        <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Delete Comment">
+                                            <ion-icon name="trash-outline" class="text-sm"></ion-icon>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-6 text-gray-400 text-xs">
+                                No comments yet. Be the first to comment!
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        @* Sidebar *@
+        <div class="flex-1">
+            <div class="lg:space-y-4 lg:pb-8 max-lg:grid sm:grid-cols-2 max-lg:gap-6">
+                <div class="box p-5 px-6">
+                    <partial name="Sidebar/_SuggestedFriends" />
+                </div>
+                <div class="box p-5 px-6 border1">
+                    @await Component.InvokeAsync("Hashtags")
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<partial name="Modals/_CreateStory"></partial>
+<partial name="Modals/_CreateStatus" model="new PostVM()"></partial>
+<partial name="~/Views/Home/_PostDeleteConfirmation.cshtml" />
+
+<script>
+    function openPostDeleteConfirmation(postId) {
+        console.log('Post ID to delete:', postId);
+        UIkit.dropdown('.post-options-dropdown').hide();
+        document.getElementById('postId').value = postId;
+        UIkit.modal('#postDeleteDialog').show();
+    }
+</script>
